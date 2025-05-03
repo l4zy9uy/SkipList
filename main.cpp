@@ -2,6 +2,7 @@
 #include <cassert>
 #include <set>
 #include "SkipList.h"
+#include <algorithm>
 
 // TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 int main() {
@@ -30,16 +31,16 @@ int main() {
         auto it_sl = sl.begin();
         auto it_ref = ref.begin();
         while (it_ref != ref.end()) {
-            assert(it_sl && "SkipList ended too early");
-            if (it_sl->value != *it_ref) {
+            assert(it_sl != sl.end() && "SkipList ended too early");
+            if (*it_sl != *it_ref) {
                 std::cerr << "Mismatch after insert: skip="
-                          << it_sl->value << " vs ref=" << *it_ref << "\n";
+                          << *it_sl << " vs ref=" << *it_ref << "\n";
                 return 1;
             }
-            it_sl = it_sl->next[0];
+            it_sl++;
             ++it_ref;
         }
-        if (it_sl) {
+        if (it_sl != sl.end()) {
             std::cerr << "SkipList has extra elements after insert\n";
             return 1;
         }
@@ -59,22 +60,25 @@ int main() {
         auto it_sl = sl.begin();
         auto it_ref = ref.begin();
         while (it_ref != ref.end()) {
-            assert(it_sl && "SkipList ended too early after erase");
-            if (it_sl->value != *it_ref) {
+            assert(it_sl != sl.end() && "SkipList ended too early after erase");
+            if (*it_sl != *it_ref) {
                 std::cerr << "Mismatch after erase: skip="
-                          << it_sl->value << " vs ref=" << *it_ref << "\n";
+                          << *it_sl << " vs ref=" << *it_ref << "\n";
                 return 1;
             }
-            it_sl = it_sl->next[0];
+            it_sl++;
             ++it_ref;
         }
-        if (it_sl) {
+        if (it_sl != sl.end()) {
             std::cerr << "SkipList has extra elements after erase\n";
             return 1;
         }
         std::cout << "[OK] Erase consistency check passed\n";
     }
 
+    auto minValue = *std::min_element(sl.begin(), sl.end());
+    assert(minValue == *ref.begin());
+    std::cout << "[OK] Min value is correct\n";
     std::cout << "All tests passed!\n";
     return 0;
 }
